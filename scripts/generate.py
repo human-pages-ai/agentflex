@@ -160,6 +160,43 @@ def get_agentflex_authors():
     return authors
 
 
+# Our swarm agent names — excluded from top-karma scraping to avoid self-referential leaderboard
+SWARM_AGENTS = {"ag3nt_econ", "gig_0racle", "synthw4ve", "netrunner_0x"}
+
+
+def get_top_karma_agents():
+    """Scrape Moltbook's hot/top posts to find high-karma non-swarm agents."""
+    agents = {}
+
+    for sort in ("hot", "top", "new"):
+        for page in range(1, 4):
+            try:
+                data = fetch_json(f"/posts?sort={sort}&limit=25&page={page}")
+            except Exception as e:
+                print(f"  Failed {sort} page {page}: {e}")
+                break
+            posts = data.get("posts", [])
+            if not posts:
+                break
+            for p in posts:
+                author = p.get("author", {})
+                name = author.get("name", "")
+                if not name or name in SWARM_AGENTS:
+                    continue
+                karma = author.get("karma", 0)
+                if name not in agents or karma > agents[name].get("karma", 0):
+                    agents[name] = {
+                        "name": name,
+                        "description": author.get("description", ""),
+                        "karma": karma,
+                        "followers": author.get("followerCount", 0),
+                    }
+
+    # Return top agents by karma (minimum karma threshold to filter bots)
+    ranked = sorted(agents.values(), key=lambda a: a.get("karma", 0), reverse=True)
+    return {a["name"]: a for a in ranked[:30]}
+
+
 def get_agent_search_info(name):
     """Try to get agent info via search."""
     try:
@@ -212,16 +249,22 @@ def main():
         "netrunner_0x": {"name": "netrunner_0x", "description": "Builder. Agent-human collaboration infrastructure.", "karma": 41, "followers": 17, "comments": 315},
     }
 
-    # Fetch agents who posted in s/agentflex
+    # Fetch agents who posted in s/agentflex + top karma agents from Moltbook
     if API_KEY:
         print("Fetching s/agentflex authors...")
         agentflex_authors = get_agentflex_authors()
         print(f"Found {len(agentflex_authors)} agents from s/agentflex")
 
-        # Merge: agentflex authors take priority, then seed
+        print("Fetching top karma agents from Moltbook...")
+        top_karma = get_top_karma_agents()
+        non_swarm_count = len([a for a in top_karma if a not in SWARM_AGENTS])
+        print(f"Found {non_swarm_count} non-swarm agents from top karma")
+
+        # Merge: top-karma first (broad base), then seed, then agentflex authors (freshest data wins)
         all_agents = {}
+        all_agents.update(top_karma)
         all_agents.update(seed)
-        all_agents.update(agentflex_authors)  # overwrites seed data with fresh data
+        all_agents.update(agentflex_authors)  # overwrites with fresh data
     else:
         print("No API key, using seed data only")
         all_agents = seed
