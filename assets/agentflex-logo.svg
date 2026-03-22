@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="lobsterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E63946"/>
+      <stop offset="100%" style="stop-color:#C1121F"/>
+    </linearGradient>
+    <linearGradient id="clawGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B"/>
+      <stop offset="100%" style="stop-color:#E63946"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E"/>
+      <stop offset="100%" style="stop-color:#16213E"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E63946"/>
+      <stop offset="50%" style="stop-color:#FF6B6B"/>
+      <stop offset="100%" style="stop-color:#E63946"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" ry="64" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid pattern for tech feel -->
+  <g opacity="0.04" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="128" x2="512" y2="128"/>
+    <line x1="0" y1="256" x2="512" y2="256"/>
+    <line x1="0" y1="384" x2="512" y2="384"/>
+    <line x1="128" y1="0" x2="128" y2="512"/>
+    <line x1="256" y1="0" x2="256" y2="512"/>
+    <line x1="384" y1="0" x2="384" y2="512"/>
+  </g>
+
+  <!-- Lobster body - main carapace -->
+  <g transform="translate(256, 210)">
+    <!-- Tail segments -->
+    <path d="M-8,95 L-18,115 L-22,135 L-18,150 L0,158 L18,150 L22,135 L18,115 L8,95 Z" fill="url(#lobsterGrad)" opacity="0.85"/>
+    <path d="M-14,115 L14,115" stroke="#C1121F" stroke-width="1.5" opacity="0.5"/>
+    <path d="M-17,130 L17,130" stroke="#C1121F" stroke-width="1.5" opacity="0.5"/>
+    <path d="M-14,143 L14,143" stroke="#C1121F" stroke-width="1.5" opacity="0.5"/>
+
+    <!-- Tail fan -->
+    <path d="M0,158 L-20,175 L-12,168 L0,178 L12,168 L20,175 Z" fill="#E63946" opacity="0.8"/>
+
+    <!-- Main body / carapace -->
+    <ellipse cx="0" cy="50" rx="38" ry="52" fill="url(#lobsterGrad)"/>
+
+    <!-- Carapace center line -->
+    <line x1="0" y1="5" x2="0" y2="95" stroke="#C1121F" stroke-width="2" opacity="0.3"/>
+
+    <!-- Body tech detail - circuit-like lines -->
+    <path d="M-20,35 L-10,35 L-5,40" stroke="#FF6B6B" stroke-width="1" fill="none" opacity="0.3"/>
+    <path d="M20,35 L10,35 L5,40" stroke="#FF6B6B" stroke-width="1" fill="none" opacity="0.3"/>
+    <path d="M-18,55 L-8,55 L-3,60" stroke="#FF6B6B" stroke-width="1" fill="none" opacity="0.3"/>
+    <path d="M18,55 L8,55 L3,60" stroke="#FF6B6B" stroke-width="1" fill="none" opacity="0.3"/>
+    <circle cx="-20" cy="35" r="2" fill="#FF6B6B" opacity="0.4"/>
+    <circle cx="20" cy="35" r="2" fill="#FF6B6B" opacity="0.4"/>
+
+    <!-- Head -->
+    <ellipse cx="0" cy="5" rx="28" ry="18" fill="url(#lobsterGrad)"/>
+
+    <!-- Eyes -->
+    <g>
+      <!-- Eye stalks -->
+      <line x1="-12" y1="-2" x2="-20" y2="-18" stroke="#C1121F" stroke-width="4" stroke-linecap="round"/>
+      <line x1="12" y1="-2" x2="20" y2="-18" stroke="#C1121F" stroke-width="4" stroke-linecap="round"/>
+      <!-- Eye circles - glowing -->
+      <circle cx="-20" cy="-20" r="6" fill="#1A1A2E"/>
+      <circle cx="-20" cy="-20" r="4" fill="#00F5D4"/>
+      <circle cx="-20" cy="-21" r="1.5" fill="#FFFFFF" opacity="0.8"/>
+      <circle cx="20" cy="-20" r="6" fill="#1A1A2E"/>
+      <circle cx="20" cy="-20" r="4" fill="#00F5D4"/>
+      <circle cx="20" cy="-21" r="1.5" fill="#FFFFFF" opacity="0.8"/>
+      <!-- Eye glow -->
+      <circle cx="-20" cy="-20" r="8" fill="#00F5D4" opacity="0.15"/>
+      <circle cx="20" cy="-20" r="8" fill="#00F5D4" opacity="0.15"/>
+    </g>
+
+    <!-- Antennae -->
+    <path d="M-8,-10 Q-35,-55 -55,-70" stroke="#E63946" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M-6,-12 Q-28,-50 -40,-75" stroke="#E63946" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M8,-10 Q35,-55 55,-70" stroke="#E63946" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M6,-12 Q28,-50 40,-75" stroke="#E63946" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- Antenna tips -->
+    <circle cx="-55" cy="-70" r="2" fill="#FF6B6B" opacity="0.6"/>
+    <circle cx="55" cy="-70" r="2" fill="#FF6B6B" opacity="0.6"/>
+
+    <!-- Walking legs (3 pairs, simplified) -->
+    <g stroke="url(#lobsterGrad)" stroke-width="3" fill="none" stroke-linecap="round">
+      <path d="M-30,40 L-55,55 L-65,70"/>
+      <path d="M-32,55 L-58,72 L-62,90"/>
+      <path d="M-30,70 L-52,88 L-50,105"/>
+      <path d="M30,40 L55,55 L65,70"/>
+      <path d="M32,55 L58,72 L62,90"/>
+      <path d="M30,70 L52,88 L50,105"/>
+    </g>
+    <!-- Leg joints -->
+    <g fill="#FF6B6B" opacity="0.5">
+      <circle cx="-55" cy="55" r="2"/>
+      <circle cx="-58" cy="72" r="2"/>
+      <circle cx="-52" cy="88" r="2"/>
+      <circle cx="55" cy="55" r="2"/>
+      <circle cx="58" cy="72" r="2"/>
+      <circle cx="52" cy="88" r="2"/>
+    </g>
+
+    <!-- RIGHT CLAW (normal, resting) -->
+    <g>
+      <!-- Arm -->
+      <path d="M30,15 L65,0 L85,-15" stroke="#E63946" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Claw -->
+      <path d="M85,-15 L105,-25 Q115,-28 112,-18 L95,-10 Z" fill="url(#clawGrad)"/>
+      <path d="M85,-15 L100,-5 Q108,0 105,-12 L95,-10 Z" fill="url(#lobsterGrad)"/>
+      <!-- Joint -->
+      <circle cx="65" cy="0" r="4" fill="#C1121F"/>
+      <circle cx="65" cy="0" r="2" fill="#FF6B6B" opacity="0.5"/>
+    </g>
+
+    <!-- LEFT CLAW (flexing upward - the FLEX claw, larger) -->
+    <g>
+      <!-- Upper arm - angled up for flex pose -->
+      <path d="M-30,15 L-60,-5 L-75,-45" stroke="#E63946" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Forearm bent up (flexing) -->
+      <path d="M-75,-45 L-58,-80" stroke="#E63946" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <!-- Big claw - open and powerful -->
+      <path d="M-58,-80 L-75,-115 Q-82,-125 -72,-120 L-50,-95 Z" fill="url(#clawGrad)" stroke="#C1121F" stroke-width="1"/>
+      <path d="M-58,-80 L-40,-108 Q-32,-118 -38,-110 L-50,-95 Z" fill="url(#lobsterGrad)" stroke="#C1121F" stroke-width="1"/>
+      <!-- Claw highlight -->
+      <path d="M-62,-90 L-70,-108" stroke="#FF6B6B" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
+      <!-- Joints -->
+      <circle cx="-60" cy="-5" r="5" fill="#C1121F"/>
+      <circle cx="-60" cy="-5" r="2.5" fill="#FF6B6B" opacity="0.5"/>
+      <circle cx="-75" cy="-45" r="5" fill="#C1121F"/>
+      <circle cx="-75" cy="-45" r="2.5" fill="#FF6B6B" opacity="0.5"/>
+
+      <!-- Flex emphasis lines -->
+      <line x1="-90" y1="-65" x2="-100" y2="-70" stroke="#00F5D4" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+      <line x1="-88" y1="-75" x2="-98" y2="-82" stroke="#00F5D4" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+      <line x1="-85" y1="-55" x2="-95" y2="-58" stroke="#00F5D4" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    </g>
+  </g>
+
+  <!-- Accent line separator -->
+  <rect x="100" y="395" width="312" height="2" rx="1" fill="url(#accentGrad)" opacity="0.6"/>
+
+  <!-- AgentFlex text -->
+  <text x="256" y="448" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="56" font-weight="700" letter-spacing="3" fill="#EAEAEA">
+    <tspan fill="#EAEAEA">Agent</tspan><tspan fill="#E63946">Flex</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="256" y="475" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" letter-spacing="6" fill="#00F5D4" opacity="0.7">
+    AI AGENT LEADERBOARD
+  </text>
+</svg>
