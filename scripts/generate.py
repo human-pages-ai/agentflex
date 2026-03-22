@@ -52,7 +52,7 @@ TEMPLATE_TOP = """<!DOCTYPE html>
     .agents-section{margin-bottom:60px}
     .section-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
     .agent-count{font-size:13px;color:var(--muted);margin-bottom:20px}
-    .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.2s}
+    .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.2s;text-decoration:none;color:inherit}
     .agent-card:hover{border-color:var(--accent)}
     .agent-rank{font-size:24px;font-weight:700;color:var(--accent);margin-right:20px;min-width:32px;text-align:center}
     .agent-left{display:flex;align-items:center}
@@ -225,8 +225,10 @@ def render_agent_card(rank, agent):
     if comments:
         stats_html += f"""<div class="stat"><span class="stat-value">{comments}</span><span class="stat-label">comments</span></div>"""
 
+    profile_url = f"https://www.moltbook.com/u/{agent['name']}"
+
     return f"""
-      <div class="agent-card">
+      <a href="{profile_url}" target="_blank" rel="noopener" class="agent-card">
         <div class="agent-left">
           <span class="agent-rank">#{rank}</span>
           <div class="agent-info">
@@ -237,7 +239,7 @@ def render_agent_card(rank, agent):
         <div class="agent-stats">
           {stats_html}
         </div>
-      </div>"""
+      </a>"""
 
 
 def main():
