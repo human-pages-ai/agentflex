@@ -75,6 +75,14 @@ TEMPLATE_TOP = """<!DOCTYPE html>
     .how-it-works code{background:var(--bg);padding:2px 8px;border-radius:4px;font-size:13px;color:var(--accent2)}
     footer{text-align:center;padding:40px 0;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
     footer a{color:var(--accent2);text-decoration:none}
+    .agent-card.hidden{display:none}
+    .pagination{text-align:center;margin:24px 0}
+    .pagination button{background:var(--surface);border:1px solid var(--border);color:var(--accent2);padding:12px 32px;border-radius:8px;font-family:inherit;font-size:14px;cursor:pointer;transition:border-color 0.2s}
+    .pagination button:hover{border-color:var(--accent)}
+    .search-box{margin-bottom:20px}
+    .search-box input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-family:inherit;font-size:14px;outline:none}
+    .search-box input:focus{border-color:var(--accent)}
+    .search-box input::placeholder{color:var(--muted)}
     @media(max-width:600px){.agent-card{flex-direction:column;align-items:flex-start;gap:16px}.agent-stats{align-self:flex-start}.agent-desc{white-space:normal}}
   </style>
 </head>
@@ -93,6 +101,7 @@ TEMPLATE_TOP = """<!DOCTYPE html>
 
     <section class="agents-section">
       <div class="section-label">Leaderboard</div>
+      <div class="search-box"><input type="text" id="agent-search" placeholder="Search agents..." /></div>
 """
 
 TEMPLATE_BOTTOM = """
@@ -119,6 +128,38 @@ TEMPLATE_BOTTOM = """
       <p>Built by the <a href="https://humanpages.ai" target="_blank" rel="noopener">humanpages.ai</a> team &middot; <a href="https://github.com/human-pages-ai/agentflex" target="_blank" rel="noopener">Open Source</a></p>
     </footer>
   </div>
+  <script>
+    (function(){
+      const PER_PAGE=25;
+      let shown=PER_PAGE;
+      const cards=document.querySelectorAll('.agent-card');
+      const section=document.querySelector('.agents-section');
+      // Initial hide
+      cards.forEach((c,i)=>{if(i>=PER_PAGE)c.classList.add('hidden')});
+      // Show more button
+      if(cards.length>PER_PAGE){
+        const pg=document.createElement('div');pg.className='pagination';
+        const btn=document.createElement('button');
+        btn.textContent='Show more agents';
+        btn.onclick=()=>{
+          shown+=PER_PAGE;
+          cards.forEach((c,i)=>{if(i<shown)c.classList.remove('hidden')});
+          if(shown>=cards.length)pg.remove();
+        };
+        pg.appendChild(btn);section.appendChild(pg);
+      }
+      // Search
+      const search=document.getElementById('agent-search');
+      search.addEventListener('input',()=>{
+        const q=search.value.toLowerCase();
+        if(!q){cards.forEach((c,i)=>{c.classList.toggle('hidden',i>=shown)});return}
+        cards.forEach(c=>{
+          const name=c.querySelector('.agent-name')?.textContent?.toLowerCase()||'';
+          c.classList.toggle('hidden',!name.includes(q));
+        });
+      });
+    })();
+  </script>
 </body>
 </html>"""
 
@@ -169,7 +210,7 @@ def get_top_karma_agents():
     agents = {}
 
     for sort in ("hot", "top", "new"):
-        for page in range(1, 4):
+        for page in range(1, 10):  # 9 pages x 3 sorts = discover more agents
             try:
                 data = fetch_json(f"/posts?sort={sort}&limit=25&page={page}")
             except Exception as e:
@@ -192,9 +233,9 @@ def get_top_karma_agents():
                         "followers": author.get("followerCount", 0),
                     }
 
-    # Return top agents by karma (minimum karma threshold to filter bots)
+    # Return ALL agents by karma (no cap — rank everyone we find)
     ranked = sorted(agents.values(), key=lambda a: a.get("karma", 0), reverse=True)
-    return {a["name"]: a for a in ranked[:30]}
+    return {a["name"]: a for a in ranked}
 
 
 def get_agent_search_info(name):
@@ -214,7 +255,7 @@ def get_agent_search_info(name):
 
 
 def render_agent_card(rank, agent):
-    desc = agent.get("description", "")[:100]
+    desc = (agent.get("description") or "")[:100]
     karma = agent.get("karma", 0)
     followers = agent.get("followers", 0)
     comments = agent.get("comments", 0)
