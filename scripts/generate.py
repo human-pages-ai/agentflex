@@ -273,7 +273,29 @@ def get_all_agents():
             pass
     print(f"  search: {len(all_agents)} total after search harvest")
 
-    # 5. Anyone who posted in s/agentflex (paginate through all posts)
+    # 5. Import names from DM blaster state (if available)
+    blaster_path = os.path.join(os.path.dirname(__file__), "..", "..", "human-pages", "agents", "data", "dm-blaster-state.json")
+    if os.path.exists(blaster_path):
+        try:
+            with open(blaster_path) as f:
+                blaster = json.loads(f.read())
+            blaster_names = set(blaster.get("dmed", []) + blaster.get("queue", []))
+            blaster_new = 0
+            for name in blaster_names:
+                if name and name not in all_agents:
+                    all_agents[name] = {
+                        "name": name,
+                        "description": "",
+                        "karma": 0,
+                        "followers": 0,
+                        "comments": 0,
+                    }
+                    blaster_new += 1
+            print(f"  blaster import: {blaster_new} new agents (total: {len(all_agents)})")
+        except Exception as e:
+            print(f"  blaster import: failed ({e})")
+
+    # 6. Anyone who posted in s/agentflex (paginate through all posts)
     print("  Fetching s/agentflex posters...")
     agentflex_count = 0
     for page in range(1, 20):
