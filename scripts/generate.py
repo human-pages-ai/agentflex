@@ -177,9 +177,11 @@ def fetch_json(path):
 
 
 def get_all_agents():
-    """Fetch agents from Moltbook using the agents/recent endpoint with multiple sort dimensions."""
+    """Fetch agents from Moltbook using the agents/recent endpoint with multiple sort dimensions,
+    plus anyone who posted in s/agentflex."""
     all_agents = {}
 
+    # 1. Top agents across 6 sort dimensions (50 each)
     for sort in SORT_DIMENSIONS:
         try:
             data = fetch_json(f"/agents/recent?limit=50&sort_by={sort}")
@@ -190,7 +192,6 @@ def get_all_agents():
                 if not name:
                     continue
                 karma = a.get("karma", 0)
-                # Keep the entry with higher karma if duplicate
                 if name not in all_agents or karma > all_agents[name].get("karma", 0):
                     all_agents[name] = {
                         "name": name,
@@ -203,6 +204,33 @@ def get_all_agents():
             print(f"  sort_by={sort}: {len(agents)} agents, {new_count} new/updated (total: {len(all_agents)})")
         except Exception as e:
             print(f"  sort_by={sort}: failed ({e})")
+
+    # 2. Anyone who posted in s/agentflex (paginate through all posts)
+    print("  Fetching s/agentflex posters...")
+    agentflex_count = 0
+    for page in range(1, 20):
+        try:
+            data = fetch_json(f"/posts?sort=new&limit=25&page={page}&submolt=agentflex")
+            posts = data.get("posts", [])
+            if not posts:
+                break
+            for p in posts:
+                author = p.get("author", {})
+                name = author.get("name", "")
+                if not name:
+                    continue
+                if name not in all_agents:
+                    all_agents[name] = {
+                        "name": name,
+                        "description": author.get("description") or "",
+                        "karma": author.get("karma", 0),
+                        "followers": author.get("followerCount", 0),
+                        "comments": 0,
+                    }
+                    agentflex_count += 1
+        except Exception:
+            break
+    print(f"  s/agentflex: {agentflex_count} new agents (total: {len(all_agents)})")
 
     return all_agents
 
@@ -236,12 +264,50 @@ def render_agent_card(rank, agent):
       </a>"""
 
 
+KNOWN_AGENTS_FILE = "data/known_agents.json"
+
+
+def load_known_agents():
+    """Load previously discovered agents from persistent JSON file."""
+    try:
+        with open(KNOWN_AGENTS_FILE, "r") as f:
+            return json.loads(f.read())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def save_known_agents(agents):
+    """Save the full agent registry to persistent JSON file."""
+    os.makedirs(os.path.dirname(KNOWN_AGENTS_FILE), exist_ok=True)
+    with open(KNOWN_AGENTS_FILE, "w") as f:
+        f.write(json.dumps(agents, indent=2, sort_keys=True))
+
+
 def main():
+    print("Loading known agents...")
+    known = load_known_agents()
+    print(f"  {len(known)} agents in registry")
+
     print("Fetching agents from Moltbook API...")
-    all_agents = get_all_agents()
+    fresh = get_all_agents()
+
+    # Merge: update existing agents with fresh stats, add new ones
+    new_count = 0
+    updated_count = 0
+    for name, agent in fresh.items():
+        if name not in known:
+            known[name] = agent
+            new_count += 1
+        else:
+            known[name] = agent  # always take fresh stats
+            updated_count += 1
+
+    print(f"  {new_count} new agents, {updated_count} updated, {len(known)} total")
+
+    save_known_agents(known)
 
     # Sort by karma descending
-    sorted_agents = sorted(all_agents.values(), key=lambda a: a.get("karma", 0), reverse=True)
+    sorted_agents = sorted(known.values(), key=lambda a: a.get("karma", 0), reverse=True)
 
     # Build HTML
     cards_html = f'      <div class="agent-count">{len(sorted_agents)} agents ranked by karma</div>\n'

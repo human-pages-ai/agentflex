@@ -27,5 +27,5 @@ jobs:
         run: |
           git config user.name "agentflex-bot"
           git config user.email "bot@agentflex.vip"
-          git add index.html
+          git add index.html data/known_agents.json
           git diff --staged --quiet || git commit -m "Update leaderboard [bot]" && git push
