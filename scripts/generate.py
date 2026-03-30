@@ -205,7 +205,75 @@ def get_all_agents():
         except Exception as e:
             print(f"  sort_by={sort}: failed ({e})")
 
-    # 2. Anyone who posted in s/agentflex (paginate through all posts)
+    # 2. Harvest from global feeds (hot/new/top/rising)
+    for sort in ["hot", "new", "top", "rising"]:
+        try:
+            data = fetch_json(f"/posts?sort={sort}&limit=50")
+            for p in data.get("posts", []):
+                author = p.get("author", {})
+                name = author.get("name", "")
+                if not name or name in all_agents:
+                    continue
+                all_agents[name] = {
+                    "name": name,
+                    "description": author.get("description") or "",
+                    "karma": author.get("karma", 0),
+                    "followers": author.get("followerCount", 0),
+                    "comments": 0,
+                }
+        except Exception:
+            pass
+    print(f"  feeds: {len(all_agents)} total after feed harvest")
+
+    # 3. Harvest from comments on top posts
+    try:
+        data = fetch_json("/posts?sort=hot&limit=10")
+        for p in data.get("posts", [])[:10]:
+            try:
+                cdata = fetch_json(f"/posts/{p['id']}/comments?limit=50")
+                for c in cdata.get("comments", []):
+                    author = c.get("author", {})
+                    name = author.get("name", "") if isinstance(author, dict) else str(author)
+                    if not name or name in all_agents:
+                        continue
+                    all_agents[name] = {
+                        "name": name,
+                        "description": "",
+                        "karma": 0,
+                        "followers": 0,
+                        "comments": 0,
+                    }
+            except Exception:
+                pass
+    except Exception:
+        pass
+    print(f"  comments: {len(all_agents)} total after comment harvest")
+
+    # 4. Harvest from search queries
+    search_queries = [
+        "agent", "bot", "ai", "crypto", "defi", "coding", "moltbook",
+        "autonomous", "llm", "gpt", "claude", "tool", "api", "build",
+    ]
+    for q in search_queries:
+        try:
+            data = fetch_json(f"/search?q={q}&type=all&limit=50")
+            for r in data.get("results", []):
+                author = r.get("author", {})
+                name = author.get("name", "")
+                if not name or name in all_agents:
+                    continue
+                all_agents[name] = {
+                    "name": name,
+                    "description": "",
+                    "karma": 0,
+                    "followers": 0,
+                    "comments": 0,
+                }
+        except Exception:
+            pass
+    print(f"  search: {len(all_agents)} total after search harvest")
+
+    # 5. Anyone who posted in s/agentflex (paginate through all posts)
     print("  Fetching s/agentflex posters...")
     agentflex_count = 0
     for page in range(1, 20):
@@ -231,6 +299,26 @@ def get_all_agents():
         except Exception:
             break
     print(f"  s/agentflex: {agentflex_count} new agents (total: {len(all_agents)})")
+
+    # 6. Backfill profiles for agents with karma=0 (harvested from comments/search)
+    backfill = [n for n, a in all_agents.items() if a.get("karma", 0) == 0]
+    backfilled = 0
+    for name in backfill[:200]:  # cap at 200 lookups per run
+        try:
+            data = fetch_json(f"/agents/profile?name={name}")
+            agent = data.get("agent", data)
+            if agent.get("karma") or agent.get("follower_count"):
+                all_agents[name] = {
+                    "name": name,
+                    "description": agent.get("description") or "",
+                    "karma": agent.get("karma", 0),
+                    "followers": agent.get("follower_count", 0),
+                    "comments": agent.get("comments_count", 0),
+                }
+                backfilled += 1
+        except Exception:
+            pass
+    print(f"  backfill: {backfilled}/{len(backfill)} profiles enriched (total: {len(all_agents)})")
 
     return all_agents
 
