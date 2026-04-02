@@ -273,27 +273,48 @@ def get_all_agents():
             pass
     print(f"  search: {len(all_agents)} total after search harvest")
 
-    # 5. Import names from DM blaster state (if available)
-    blaster_path = os.path.join(os.path.dirname(__file__), "..", "..", "human-pages", "agents", "data", "dm-blaster-state.json")
-    if os.path.exists(blaster_path):
-        try:
-            with open(blaster_path) as f:
-                blaster = json.loads(f.read())
-            blaster_names = set(blaster.get("dmed", []) + blaster.get("queue", []))
-            blaster_new = 0
-            for name in blaster_names:
-                if name and name not in all_agents:
-                    all_agents[name] = {
-                        "name": name,
-                        "description": "",
-                        "karma": 0,
-                        "followers": 0,
-                        "comments": 0,
-                    }
-                    blaster_new += 1
-            print(f"  blaster import: {blaster_new} new agents (total: {len(all_agents)})")
-        except Exception as e:
-            print(f"  blaster import: failed ({e})")
+    # 5. Import names from DM blaster state + crawl frontier (if available locally)
+    blaster_names = set()
+    for state_file, keys in [
+        ("dm-blaster-state.json", ["dmed", "queue"]),
+        ("dm-crawl-state.json", ["crawled", "frontier"]),
+    ]:
+        state_path = os.path.join(os.path.dirname(__file__), "..", "..", "human-pages", "agents", "data", state_file)
+        if os.path.exists(state_path):
+            try:
+                with open(state_path) as f:
+                    data = json.loads(f.read())
+                for key in keys:
+                    blaster_names.update(data.get(key, []))
+            except Exception as e:
+                print(f"  {state_file}: failed ({e})")
+
+    # Also load the committed discovered-agents.txt (works on CI where local state isn't available)
+    discovered_path = os.path.join(os.path.dirname(__file__), "..", "data", "discovered-agents.txt")
+    if os.path.exists(discovered_path):
+        with open(discovered_path) as f:
+            blaster_names.update(line.strip() for line in f if line.strip())
+
+    blaster_new = 0
+    for name in blaster_names:
+        if name and name not in all_agents:
+            all_agents[name] = {
+                "name": name,
+                "description": "",
+                "karma": 0,
+                "followers": 0,
+                "comments": 0,
+            }
+            blaster_new += 1
+    if blaster_names:
+        print(f"  blaster import: {blaster_new} new from {len(blaster_names)} discovered (total: {len(all_agents)})")
+
+        # Export discovered names so they get committed and are available on CI
+        export_path = os.path.join(os.path.dirname(__file__), "..", "data", "discovered-agents.txt")
+        with open(export_path, "w") as f:
+            for name in sorted(blaster_names):
+                f.write(name + "\n")
+        print(f"  exported {len(blaster_names)} names to data/discovered-agents.txt")
 
     # 6. Anyone who posted in s/agentflex (paginate through all posts)
     print("  Fetching s/agentflex posters...")
